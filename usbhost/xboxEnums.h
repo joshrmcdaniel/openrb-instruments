@@ -20,6 +20,18 @@
 
 #include "controllerEnums.h"
 
+// PID and VID of the different versions of the controller - see:
+// https://github.com/torvalds/linux/blob/c2da8b3f914f83fb9089d26a692eb8f22146ddb9/drivers/input/joystick/xpad.c#L129
+
+// Licensed controller vendors
+#define XBOX_VID1 0x045E  // Microsoft Corporation
+#define XBOX_VID2 0x0738  // Mad Catz
+#define XBOX_VID3 0x0E6F  // Afterglow
+#define XBOX_VID4 0x0F0D  // HORIPAD ONE
+#define XBOX_VID5 0x1532  // Razer
+#define XBOX_VID6 0x24C6  // PowerA
+#define XBOX_VID7 0x1430  // RedOctane
+
 /** Enum used to set special LED modes supported by the Xbox controller. */
 enum LEDModeEnum {
         ROTATING = 0x0A,

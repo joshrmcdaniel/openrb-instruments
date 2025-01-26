@@ -1,71 +1,47 @@
-/* Copyright (C) 2012 Kristian Lauszus, TKJ Electronics. All rights reserved.
-   Copyright (C) 2015 guruthree
+#pragma once
+#define _xbox360_h_
 
- This software may be distributed and modified under the terms of the GNU
- General Public License version 2 (GPL2) as published by the Free Software
- Foundation and appearing in the file GPL2.TXT included in the packaging of
- this file. Please note that GPL2 Section 2[b] requires that all works based
- on this software must also be made publicly available under the terms of
- the GPL2 ("Copyleft").
-
- Contact information
- -------------------
-
- Kristian Lauszus, TKJ Electronics
- Web      :  http://www.tkjelectronics.com
- e-mail   :  kristianl@tkjelectronics.com
-
- guruthree
- Web      :  https://github.com/guruthree/
- */
-
-#ifndef _xboxone_h_
-#define _xboxone_h_
-
+enum ButtonBits {
+    btnHatRight      = 0x8000,
+    btnHatLeft       = 0x4000,
+    btnBack          = 0x2000,
+    btnStart         = 0x1000,
+    btnDigiRight     = 0x0800,
+    btnDigiLeft      = 0x0400,
+    btnDigiDown      = 0x0200,
+    btnDigiUp        = 0x0100,
+    btnY             = 0x0080,
+    btnX             = 0x0040,
+    btnB             = 0x0020,
+    btnA             = 0x0010,
+    btnReserved1     = 0x0008,  // Unused?
+    btnXbox          = 0x0004,
+    btnShoulderRight = 0x0002,
+    btnShoulderLeft  = 0x0001
+};
+#ifndef _usb_h_
 #include "Usb.h"
+#endif
+#ifndef _xboxenums_h
 #include "xboxEnums.h"
-
-/* Xbox One data taken from descriptors */
-#define XBOX_ONE_EP_MAXPKTSIZE 64  // Max size for data via USB
-
-/* Names we give to the 3 XboxONE pipes */
-#define XBOX_ONE_CONTROL_PIPE 0
-#define XBOX_ONE_OUTPUT_PIPE 1
-#define XBOX_ONE_INPUT_PIPE 2
-
-#define XBOX_ONE_MAX_ENDPOINTS 3
-
+#endif
 // PID and VID of the different versions of the controller - see:
-// https://github.com/torvalds/linux/blob/master/drivers/input/joystick/xpad.c
+// https://github.com/torvalds/linux/blob/c2da8b3f914f83fb9089d26a692eb8f22146ddb9/drivers/input/joystick/xpad.c#L129
+#define XBOX_360_PID1 0x028E  // Microsoft X-Box 360 pad
+#define XBOX_360_PID2 0x028F  // Microsoft X-Box 360 pad v2
+#define XBOx_360_PID3 0x0291  // Microsoft X-Box 360 Wireless Receiver
+#define XBOX_360_PID4 0x4726  // Mad Catz Xbox 360 Controller
+#define XBOX_360_PID5 0x0130  // Ion Drum Rocker
+#define XBOX_360_PID6 0x0002  // Harmonix Guitar for Xbox 360
+#define XBOX_360_PID7 0xF901  // GameStop Xbox 360 Controller
 
-// Official controllers
-#define XBOX_ONE_PID1 0x02D1   // Microsoft X-Box One pad
-#define XBOX_ONE_PID2 0x02DD   // Microsoft X-Box One pad (Firmware 2015)
-#define XBOX_ONE_PID3 0x02E3   // Microsoft X-Box One Elite pad
-#define XBOX_ONE_PID4 0x02EA   // Microsoft X-Box One S pad
-#define XBOX_ONE_PID13 0x0B0A  // Microsoft X-Box One Adaptive Controller
-#define XBOX_ONE_PID14 0x0B12  // Microsoft X-Box Core Controller
-
-// Unofficial controllers
-
-#define XBOX_ONE_PID5 \
-    0x4A01  // Mad Catz FightStick TE 2 - might have different mapping for triggers?
-#define XBOX_ONE_PID6 0x0139   // Afterglow Prismatic Wired Controller
-#define XBOX_ONE_PID7 0x0146   // Rock Candy Wired Controller for Xbox One
-#define XBOX_ONE_PID8 0x0067   // HORIPAD ONE
-#define XBOX_ONE_PID9 0x0A03   // Razer Wildcat
-#define XBOX_ONE_PID10 0x541A  // PowerA Xbox One Mini Wired Controller
-#define XBOX_ONE_PID11 0x542A  // Xbox ONE spectra
-#define XBOX_ONE_PID12 0x543A  // PowerA Xbox One wired controller
-
-/** This class implements support for a Xbox ONE controller connected via USB. */
-class XBOXONE : public USBDeviceConfig, public UsbConfigXtracter {
+class XBOX360 : public USBDeviceConfig, public UsbConfigXtracter {
 public:
     /**
-     * Constructor for the XBONEAUTH class.
+     * Constructor for the XB360AUTH class.
      * @param  pUsb   Pointer to USB class instance.
      */
-    XBOXONE(USB *pUsb, void (*data_cb)(const uint8_t *data, const uint8_t &ndata));
+    XBOX360(USB *pUsb, void (*data_cb)(const uint8_t *data, const uint8_t &ndata));
 
     /** @name USBDeviceConfig implementation */
     /**
@@ -119,12 +95,10 @@ public:
      */
     virtual bool VIDPIDOK(uint16_t vid, uint16_t pid) {
         return ((vid == XBOX_VID1 || vid == XBOX_VID2 || vid == XBOX_VID3 || vid == XBOX_VID4 ||
-                 vid == XBOX_VID5 || vid == XBOX_VID6) &&
-                (pid == XBOX_ONE_PID1 || pid == XBOX_ONE_PID2 || pid == XBOX_ONE_PID3 ||
-                 pid == XBOX_ONE_PID4 || pid == XBOX_ONE_PID5 || pid == XBOX_ONE_PID6 ||
-                 pid == XBOX_ONE_PID7 || pid == XBOX_ONE_PID8 || pid == XBOX_ONE_PID9 ||
-                 pid == XBOX_ONE_PID10 || pid == XBOX_ONE_PID11 || pid == XBOX_ONE_PID12 ||
-                 pid == XBOX_ONE_PID13 || pid == XBOX_ONE_PID14));
+                 vid == XBOX_VID5 || vid == XBOX_VID6 || XBOX_VID7) &&
+                (pid == XBOX_360_PID1 || pid == XBOX_360_PID2 || pid == XBOX_360_PID3 ||
+                 pid == XBOX_360_PID4 || pid == XBOX_360_PID5 || pid == XBOX_360_PID6 ||
+                 pid == XBOX_360_PID7));
     };
     /**@}*/
 
@@ -249,4 +223,6 @@ private:
 
     /* Private commands */
 };
+#endif
+
 #endif
