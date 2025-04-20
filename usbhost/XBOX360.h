@@ -29,11 +29,17 @@ enum ButtonBits {
 // https://github.com/torvalds/linux/blob/c2da8b3f914f83fb9089d26a692eb8f22146ddb9/drivers/input/joystick/xpad.c#L129
 #define XBOX_360_PID1 0x028E  // Microsoft X-Box 360 pad
 #define XBOX_360_PID2 0x028F  // Microsoft X-Box 360 pad v2
-#define XBOx_360_PID3 0x0291  // Microsoft X-Box 360 Wireless Receiver
+#define XBOX_360_PID3 0x0291  // Microsoft X-Box 360 Wireless Receiver
 #define XBOX_360_PID4 0x4726  // Mad Catz Xbox 360 Controller
 #define XBOX_360_PID5 0x0130  // Ion Drum Rocker
 #define XBOX_360_PID6 0x0002  // Harmonix Guitar for Xbox 360
 #define XBOX_360_PID7 0xF901  // GameStop Xbox 360 Controller
+/* Names we give to the 3 XboxONE pipes */
+#define XBOX_360_CONTROL_PIPE 0
+#define XBOX_360_OUTPUT_PIPE 1
+#define XBOX_360_INPUT_PIPE 2
+
+#define XBOX_360_MAX_ENDPOINTS 3
 
 class XBOX360 : public USBDeviceConfig, public UsbConfigXtracter {
 public:
@@ -95,7 +101,7 @@ public:
      */
     virtual bool VIDPIDOK(uint16_t vid, uint16_t pid) {
         return ((vid == XBOX_VID1 || vid == XBOX_VID2 || vid == XBOX_VID3 || vid == XBOX_VID4 ||
-                 vid == XBOX_VID5 || vid == XBOX_VID6 || XBOX_VID7) &&
+                 vid == XBOX_VID5 || vid == XBOX_VID6 || vid == XBOX_VID7) &&
                 (pid == XBOX_360_PID1 || pid == XBOX_360_PID2 || pid == XBOX_360_PID3 ||
                  pid == XBOX_360_PID4 || pid == XBOX_360_PID5 || pid == XBOX_360_PID6 ||
                  pid == XBOX_360_PID7));
@@ -148,7 +154,7 @@ public:
     /**@}*/
 
     /** True if a Xbox ONE controller is connected. */
-    bool XboxOneConnected;
+    bool Xbox360Connected;
 
     uint8_t XboxCommand(uint8_t *data, uint16_t nbytes);
 
@@ -216,7 +222,7 @@ private:
     bool sharePressed;  // This button doesn't fit in the bitfield
     bool shareClicked;
 
-    uint8_t readBuf[XBOX_ONE_EP_MAXPKTSIZE];  // General purpose buffer for input data
+    uint8_t readBuf[XBOX_360_EP_MAXPKTSIZE];  // General purpose buffer for input data
     uint8_t cmdCounter;
 
     void readReport();  // Used to read the incoming data

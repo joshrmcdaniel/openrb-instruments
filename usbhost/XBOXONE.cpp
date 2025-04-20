@@ -20,6 +20,7 @@
  */
 
 #include "XBOXONE.h"
+#include "Usb.h"
 #include "debug_helpers.h"
 // To enable serial debugging see "settings.h"
 // #define EXTRADEBUG   // Uncomment to get even more debugging data
@@ -33,6 +34,7 @@ XBOXONE::XBOXONE(USB *pUsb, void (*data_cb)(const uint8_t *data, const uint8_t &
       bNumEP(1),         // If config descriptor needs to be parsed
       qNextPollTime(0),  // Reset NextPollTime
       pollInterval(0),
+      XboxOneConnected(false),
       bPollEnable(false) {  // don't start polling before dongle is connected
     for (uint8_t i = 0; i < XBOX_ONE_MAX_ENDPOINTS; i++) {
         epInfo[i].epAddr      = 0;

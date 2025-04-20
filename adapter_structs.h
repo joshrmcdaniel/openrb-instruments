@@ -2,6 +2,12 @@
 #include <stdint.h>
 #include "Config/AdapterConfig.h"
 
+enum ControllerType {
+    NONE, 
+    XBOXONE,
+    XBOX360
+};
+
 enum FrameCommand {
     CMD_ACKNOWLEDGE   = 0x01,
     CMD_ANNOUNCE      = 0x02,

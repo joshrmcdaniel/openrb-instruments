@@ -1,3 +1,4 @@
+#pragma once
 /* Copyright (C) 2012 Kristian Lauszus, TKJ Electronics. All rights reserved.
    Copyright (C) 2015 guruthree
 
@@ -21,10 +22,7 @@
 
 #ifndef _xboxone_h_
 #define _xboxone_h_
-
-#include "Usb.h"
 #include "xboxEnums.h"
-
 /* Xbox One data taken from descriptors */
 #define XBOX_ONE_EP_MAXPKTSIZE 64  // Max size for data via USB
 

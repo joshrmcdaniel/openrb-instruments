@@ -13,6 +13,7 @@
 #include "HardwareSerial.h"
 #include "Config/AdapterConfig.h"
 #include "XBOXONE.h"
+#include "XBOX360.h"
 #include "usbh_midi.h"
 #include "usbhub.h"
 #include "adapter_structs.h"
@@ -47,12 +48,64 @@ static output_state_t outputStates[NUM_OUT];
 static USB    Usb;
 static USBHub UsbHub(&Usb);
 
-void xbPacketReceivedCB(const uint8_t *data, const uint8_t &ndata);
+static ControllerType controllerType = NONE;
 
-static XBOXONE   Xbox(&Usb, xbPacketReceivedCB);
+void xb1PacketReceivedCB(const uint8_t *data, const uint8_t &ndata);
+void xb360PacketReceivedCB(const uint8_t *data, const uint8_t &ndata);
+static XBOXONE   Xbox(&Usb, xb1PacketReceivedCB);
+static XBOX360 Xbox360(&Usb, xb360PacketReceivedCB);
 static USBH_MIDI UsbMidi(&Usb);
 
-void xbPacketReceivedCB(const uint8_t *data, const uint8_t &ndata) {
+void xb1PacketReceivedCB(const uint8_t *data, const uint8_t &ndata) {
+    if (ndata < sizeof(Frame))
+        return;
+    auto frame = (Frame *)data;
+    switch (adapter_state) {
+        case authenticating:
+            fillPacket(data, ndata, &out_packet);
+            return;
+        case power_off:
+            // TODO CDD - do something here to wake the xbox back up?
+#if 0
+            if (frame->command == CMD_GUIDE_BTN) {
+                if (frame->type & TYPE_ACK) {
+                    XBPACKET tmpPkt;
+                    auto     header = &tmpPkt.buf.frame;
+
+                    header->command  = CMD_ACKNOWLEDGE;
+                    header->deviceId = frame->deviceId;
+                    header->type     = TYPE_REQUEST;
+                    header->sequence = frame->sequence;
+                    header->length   = (sizeof(Frame) * 2) + 1;
+                    tmpPkt.buf.buffer[4] = frame->command;
+                    tmpPkt.buf.buffer[5] = frame->deviceId + TYPE_REQUEST;
+                    tmpPkt.buf.buffer[6] = frame->sequence;
+                    tmpPkt.buf.buffer[7] = frame->length;
+                    Xbox.XboxCommand(tmpPkt.buf.buffer, 9);
+                }
+                adapter_state = init_state;
+            }
+#endif
+            return;
+        case running:
+            switch (frame->command) {
+                case CMD_GUIDE_BTN:
+                    frame->sequence = getSequence();
+                    fillPacket(data, ndata, &out_packet);
+                    return;
+                case CMD_INPUT:
+                    fillInputPacketFromControllerData(data, ndata, &out_packet);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void xb360PacketReceivedCB(const uint8_t *data, const uint8_t &ndata) {
     if (ndata < sizeof(Frame))
         return;
     auto frame = (Frame *)data;
@@ -350,8 +403,19 @@ int main(void) {
         DoTasks();
         if (adapter_state == init_state) {
             current_time = millis();
+            if (Xbox.XboxOneConnected) {
+                controllerType = XBOX_ONE;
+                debug("XBOX ONE CONTROLLER CONNECTED\r\n");
+            }
+            else if (Xbox360.Xbox360Connected) {
+                controllerType = XBOX_360;
+                debug("XBOX 360 CONTROLLER CONNECTED\r\n");
+            }
+            else {
+                controllerType = NONE;
+            }
             if (((current_time - last_announce_time) > ANNOUNCE_INTERVAL_MS) &&
-                Xbox.XboxOneConnected) {
+                controllerType != NONE) {
                 debug("ANNOUNCING\r\n");
                 fillPacket(announce, sizeof(announce), &out_packet);
                 last_announce_time = millis();
